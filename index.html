@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Моя Гра</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      touch-action: none; /* вимикаємо стандартні свайпи */
+    }
+    canvas {
+      display: block;
+      background-color: #eef;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Адаптація canvas під екран
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Завантаження зображень
+    const images = {};
+    const imageFiles = ['map.png', 'marker.png', 'compass.png']; // заміни на свої файли
+    let loadedImages = 0;
+
+    imageFiles.forEach(src => {
+      const img = new Image();
+      img.src = './images/' + src; // картинки у папці images
+      img.onload = () => {
+        loadedImages++;
+        if (loadedImages === imageFiles.length) draw();
+      };
+      images[src] = img;
+    });
+
+    // Маркери
+    const markers = [
+      {x: 100, y: 100},
+      {x: 300, y: 200},
+      {x: 500, y: 400},
+    ];
+
+    // Обробка кліків і сенсорів
+    function handleClick(e) {
+      let x, y;
+      if (e.touches) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      } else {
+        x = e.clientX;
+        y = e.clientY;
+      }
+      // Наприклад, пересуваємо перший маркер
+      markers[0].x = x;
+      markers[0].y = y;
+      draw();
+    }
+
+    canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('touchstart', handleClick);
+
+    // Малювання
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Карта на весь екран
+      if (images['map.png']) ctx.drawImage(images['map.png'], 0, 0, canvas.width, canvas.height);
+
+      // Малюємо маркери
+      markers.forEach(m => {
+        if (images['marker.png']) ctx.drawImage(images['marker.png'], m.x - 15, m.y - 15, 30, 30);
+      });
+
+      // Компас у правому верхньому кутку
+      if (images['compass.png']) ctx.drawImage(images['compass.png'], canvas.width - 70, 10, 60, 60);
+    }
+  </script>
+</body>
+</html>
